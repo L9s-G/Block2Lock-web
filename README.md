@@ -20,8 +20,8 @@ Open your terminal or command prompt, navigate to the directory where you want t
 
 ```bash
 # Replace with your actual repository URL
-git clone https://github.com/L9s-G/Block2Lock-web.git
-cd Block2Lock-web
+git clone https://github.com/gzdanny/Block2Lock.git
+cd Block2Lock
 npm install
 ```
 This downloads the project and installs the Capacitor CLI and other required packages defined in `package.json`.
@@ -56,7 +56,35 @@ Now, we'll create the native Android project folder and copy our web assets into
     ```bash
     npx cap sync android
     ```
+## 📱 How to Force Portrait Mode in a Capacitor Android App
 
+To lock your Capacitor-based app in portrait mode on Android, modify the `AndroidManifest.xml` file as follows:
+
+### 🔧 Step-by-step
+
+1. Open `android/app/src/main/AndroidManifest.xml`
+2. Locate the `<activity>` tag for `BridgeActivity`
+3. Add or update the following attributes:
+
+```xml
+<activity
+    android:exported="true"
+    android:screenOrientation="portrait"
+    android:configChanges="orientation|keyboardHidden|screenSize">
+    <!-- other settings -->
+</activity>
+```
+
+### 📝 Explanation of Each Line
+
+- `android:screenOrientation="portrait"`  
+  → Forces the app to stay in portrait mode regardless of device rotation.
+
+- `android:exported="true"`  
+  → Required for Android 12+ to declare whether this activity can be launched by other apps. Needed if intent filters are present.
+
+- `android:configChanges="orientation|keyboardHidden|screenSize"`  
+  → (Optional) Prevents the activity from being destroyed and recreated when these configuration changes occur (e.g. rotation, keyboard popup), which helps avoid flickering or state loss.
 ---
 
 ## Step 4: Open the Project in Android Studio
@@ -97,6 +125,10 @@ By default, Android Studio names the output file `app-release.apk`. For better v
 3.  After pasting the code, a yellow bar will likely appear at the top of the editor window saying "Gradle files have changed...". Click the **Sync Now** link.
 
 This script will now automatically name your APK using the project name and the version name defined higher up in the `build.gradle` file.
+
+## Step 5.1: (Optional) Further Personalizing Your APK
+
+Before generating your final Release APK, you can [check this](#-further-personalizing-your-apk) to see how to further customize it.
 
 ---
 
@@ -146,3 +178,97 @@ This error (e.g., `invalid source release: 21`) can occur if Android Studio's Gr
     1.  Go to `File` > `Settings` > `Build, Execution, Deployment` > `Build Tools` > `Gradle`.
     2.  In the **Gradle JDK** dropdown, select a JDK of version **21**. If one isn't available, click "Download JDK..." and have Android Studio download and install it for you.
     3.  Click `OK` and let Gradle sync again.
+ 
+---
+
+# 🎨 Further Personalizing Your APK
+
+These tweaks help polish your app’s identity and improve user experience.
+
+---
+
+## 🖼️ 1. Change the APK Icon
+
+Capacitor does not control the final APK icon — it's defined in the native Android project.
+
+### 🔧 Steps:
+
+1. Replace the icon files in:
+
+   ```
+   android/app/src/main/res/mipmap-*/ic_launcher.png
+   ```
+
+   Recommended sizes:
+   - `mdpi`: 48×48
+   - `hdpi`: 72×72
+   - `xhdpi`: 96×96
+   - `xxhdpi`: 144×144
+   - `xxxhdpi`: 192×192
+
+2. Use [icon.kitchen](https://icon.kitchen/) to generate a complete set of launcher icons.  
+
+3. No need to change `AndroidManifest.xml` unless you rename the icon files.
+
+---
+
+## 🔢 2. Set the APK Version Number
+
+Capacitor’s `version` field is for web/PWA use. The actual APK version is defined in `build.gradle`.
+
+### 🔧 Steps:
+
+Open:
+
+```
+android/app/build.gradle
+```
+
+Edit:
+
+```groovy
+defaultConfig {
+    versionCode 3         // Integer, must increase with each release
+    versionName "1.0.2"   // User-visible version string
+}
+```
+
+---
+
+## 🚫 3. Remove or Simplify the Launch Screen
+
+Capacitor apps often show a default splash screen on startup. To disable it and launch directly into your game:
+
+### 🔧 Steps:
+
+1. Open:
+
+   ```
+   android/app/src/main/res/values/styles.xml
+   ```
+
+2. Replace this style:
+
+```xml
+<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+    <item name="android:background">@drawable/splash</item>
+</style>
+```
+
+With a minimal version:
+
+```xml
+<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+    <item name="android:background">@null</item> <!-- or use #000000 for black -->
+</style>
+```
+
+---
+
+## ✅ Result
+
+- Your app launches instantly into the main view.
+- No splash image or delay.
+- Custom icon and versioning are in place.
+
+---
